@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 for i in range(1, 7):
-    file_name = f"figure{i}.txt"
+    file_name = f"files/figure{i}.txt"
 
     with open(file_name, 'r') as file:
         min_size = float(file.readline())
