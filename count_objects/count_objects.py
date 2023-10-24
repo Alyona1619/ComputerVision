@@ -1,24 +1,61 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.measure import label
+from skimage import morphology, measure
+from skimage.draw import rectangle
 
+mask_rect = np.array([[1, 1, 1, 1],
+                      [1, 1, 1, 1],
+                      [1, 1, 1, 1]], np.uint8)
+mask_up = np.array([[1, 0, 0, 1],
+                    [1, 0, 0, 1],
+                    [1, 1, 1, 1],
+                    [1, 1, 1, 1]])
+mask_down = np.array([[1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1],
+                      [1, 1, 0, 0, 1, 1],
+                      [1, 1, 0, 0, 1, 1]])
+mask_right = np.array([[1, 1, 1, 1],
+                       [1, 1, 1, 1],
+                       [1, 1, 0, 0],
+                       [1, 1, 0, 0],
+                       [1, 1, 1, 1],
+                       [1, 1, 1, 1]])
+mask_left = np.array([[1, 1, 1, 1],
+                      [1, 1, 1, 1],
+                      [0, 0, 1, 1],
+                      [0, 0, 1, 1],
+                      [1, 1, 1, 1],
+                      [1, 1, 1, 1]])
 
-image = np.load('files/coins.npy.txt')
-
+image = np.load('files/ps.npy.txt')
 labeled = label(image)
 labels, figures = np.unique(labeled, return_counts=True)
-print("Общее количество объектов: ", labels[-1])  
+print("Общее количество объектов: ", labels[-1])
 
-variants, counts = np.unique(figures[1:], return_counts=True)
-variant_count_dict = dict(zip(variants, counts))
-for i, (value, count) in enumerate(variant_count_dict.items(), 1):
-    print(f"Вид объекта {i} (с площадью {value}) встречается {count} раз")
+rect = morphology.binary_erosion(image, mask_rect)
+labeled_rect, num_rect = measure.label(rect, return_num=True)
+# Находим прямоугольники и удаляем их
+for label in range(1, num_rect + 1):
+    label_indices = np.where(labeled_rect == label)
+    min_y, min_x = np.min(label_indices, axis=1)
+    max_y, max_x = np.max(label_indices, axis=1)
 
-# plt.imshow(image, cmap='gray')
-# plt.show()
+    rr, cc = rectangle(start=(min_y, min_x), end=(max_y, max_x))
+    image[rr, cc] = 0
+print("Количество прямоугольников:", num_rect)
 
-# Общее количество объектов:  50
-# Вид объекта 1 (с площадью 69) встречается 10 раз.
-# Вид объекта 2 (с площадью 145) встречается 13 раз.
-# Вид объекта 3 (с площадью 305) встречается 12 раз.
-# Вид объекта 4 (с площадью 609) встречается 15 раз.
+masks = [mask_up, mask_down, mask_left, mask_right]
+labels = ["up", "down", "left", "right"]
+
+for mask, label in zip(masks, labels):
+    eroded_image = morphology.binary_erosion(image, mask)
+    labeled_image, num = measure.label(eroded_image, return_num=True)
+    print(f"Количество {label}:", num)
+
+# Общее количество объектов:  500
+# Количество прямоугольников: 92
+# Количество up: 95
+# Количество down: 96
+# Количество left: 123
+# Количество right: 94
