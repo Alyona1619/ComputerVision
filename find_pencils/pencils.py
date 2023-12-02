@@ -48,14 +48,16 @@ def count_pencils(image_path):
     return counter
 
 
-folder_path = "pencils"
-pencils_count = []
+folder_path = "files/pencils"
+total = 0
 file_list = os.listdir(folder_path)
 for file_name in file_list:
     if file_name.lower().endswith('.jpg'):
         image_path = os.path.join(folder_path, file_name)
-        pencils_count.append(count_pencils(image_path))
+        n = count_pencils(image_path)
+        print(f"{image_path}: {n} pencil(s)")
+        total += n
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-print(f'Количество карандашей: {sum(pencils_count)}')  # 21
+print(f'Количество карандашей: {total}')  # 21
