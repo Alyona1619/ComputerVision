@@ -8,6 +8,7 @@ colors = {
     'g': {'lower': (60, 100, 100), 'upper': (80, 255, 255), 'color': (0, 255, 0)}
 }
 
+
 def find_ball(frame, hsv, lower, upper, color):
     mask = cv2.inRange(hsv, lower, upper)
     mask = cv2.dilate(mask, None, iterations=2)
@@ -22,6 +23,7 @@ def find_ball(frame, hsv, lower, upper, color):
             cv2.circle(frame, (int(x), int(y)), 5, color, 2)
             return int(x), int(y), int(r), center
     return None, None, None, None
+
 
 capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
@@ -45,12 +47,14 @@ while capture.isOpened():
 
     if all(balls[color]['x'] is not None for color in order):
         x_values = [balls[color]['center'][0] for color in order]
+        print(x_values)
+        print(sorted(x_values))
         if sorted(x_values) == x_values:
-            cv2.putText(frame, "Win", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+            cv2.putText(frame, "Win", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0))
         else:
-            cv2.putText(frame, "Wrong", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
+            cv2.putText(frame, "Wrong", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255))
     else:
-        cv2.putText(frame, "Show me all balls", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255))
+        cv2.putText(frame, "Show me all balls", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 255))
 
     cv2.imshow("Camera", frame)
     key = cv2.waitKey(1)

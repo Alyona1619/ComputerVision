@@ -8,6 +8,12 @@ colors = {
     'g': {'lower': (60, 100, 100), 'upper': (80, 255, 255), 'color': (0, 255, 0)},
     'y': {'lower': (25, 100, 100), 'upper': (33, 255, 255), 'color': (0, 255, 255)}
 }
+# colors = {
+#     'b': {'lower': (90, 150, 120), 'upper': (115, 255, 255), 'color': (255, 0, 0)},
+#     'r': {'lower': (2, 170, 150), 'upper': (12, 255, 255), 'color': (0, 0, 255)},
+#     'g': {'lower': (50, 70, 70), 'upper': (80, 255, 255), 'color': (0, 255, 0)},
+#     'y': {'lower': (18, 160, 150), 'upper': (30, 255, 255), 'color': (0, 255, 255)}
+# }
 
 
 def find_ball(frame, hsv, lower, upper, color):
@@ -32,7 +38,7 @@ capture.set(cv2.CAP_PROP_EXPOSURE, -6)
 
 cv2.namedWindow("Camera")
 
-order = 'brgy'
+order = 'bygr'
 order = ''.join(random.sample(order, len(order)))
 print(order)
 
@@ -46,20 +52,15 @@ while capture.isOpened():
         x, y, r, c = find_ball(frame, hsv, params['lower'], params['upper'], params['color'])
         balls[color_name] = {'x': x, 'y': y, 'r': r, 'center': c}
 
-    if all(balls[color]['x'] is not None for color in colors):
-        colors_dict = {color: balls[color]['center'] for color in order}
-
-        if (
-                colors_dict[order[0]][0] < colors_dict[order[1]][0] and
-                abs(colors_dict[order[0]][1] - colors_dict[order[1]][1]) <= 50 and
-                colors_dict[order[2]][0] < colors_dict[order[3]][0] and
-                abs(colors_dict[order[2]][1] - colors_dict[order[3]][1]) <= 50
-        ):
-            cv2.putText(frame, "Win", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+    if all(balls[color]['x'] is not None for color in order):
+        x_values = [balls[color]['center'][0] for color in order]
+        y_values = [balls[color]['center'][1] for color in order]
+        if x_values[2] < x_values[0] < x_values[1] and y_values == sorted(y_values):
+            cv2.putText(frame, "Win", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0))
         else:
-            cv2.putText(frame, "Wrong", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
+            cv2.putText(frame, "Wrong", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255))
     else:
-        cv2.putText(frame, "Show me all balls", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255))
+        cv2.putText(frame, "Show me all balls", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 255))
 
     cv2.imshow("Camera", frame)
     key = cv2.waitKey(1)
