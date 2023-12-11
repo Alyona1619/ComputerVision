@@ -6,7 +6,7 @@ from mss import mss
 import pyautogui as ptg
 import matplotlib.pyplot as plt
 
-trex_path = 'trex1.png'
+trex_path = 'trex1.png'  # прыгает 222
 
 
 def find_trex(screen, template):
@@ -16,25 +16,27 @@ def find_trex(screen, template):
 
 
 def find_lower_obstacle(screen_rect, trex_top_left, sct):
-    print(trex_top_left)
-    if (trex_top_left[1] == 128):
-        obstacle_area = {"top": screen_rect["top"] + trex_top_left[1] + 10,  # +305
-                         "left": screen_rect["left"] + trex_top_left[0] + w+33,  # +w+72
+    print(trex_top_left)  # 128 104 9...
+    if trex_top_left[1] > 104:
+        obstacle_area = {"top": screen_rect["top"] + trex_top_left[1],  # +305 round(h/2)
+                         "left": screen_rect["left"] + trex_top_left[0] + w,  # +w+72
                          "width": 40,
                          "height": 1}
     else:
-        obstacle_area = {"top": screen_rect["top"] + trex_top_left[1] + round(h/2), #+305
-                         "left": screen_rect["left"] + trex_top_left[0] + w, # +w+72
-                         "width": 40,
-                         "height": 1}
+        obstacle_area = {"top": screen_rect["top"] + trex_top_left[1] + round(h / 2),  # +305 round(h/2)
+                         "left": screen_rect["left"] + trex_top_left[0] + w,  # +w+72
+                         "width": 30,
+                         "height": 10}
     obstacle_area1 = np.array(sct.grab(obstacle_area))
     #plt.imshow(obstacle_area1)
     #plt.show()
 
     gray_obstacle = cv2.cvtColor(obstacle_area1, cv2.COLOR_BGR2GRAY)
     _, thresholded_obstacle = cv2.threshold(gray_obstacle, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    print(thresholded_obstacle)
-    f = cv2.countNonZero(thresholded_obstacle) > 0
+    #print(thresholded_obstacle)
+    c = cv2.countNonZero(thresholded_obstacle)
+    f = c > 0
+    print(c)
     print(f)
     return obstacle_area, cv2.countNonZero(thresholded_obstacle) > 0
 
@@ -44,40 +46,21 @@ w, h = template_trex.shape[::-1]
 with mss() as sct:
     screen_rect = {"top": 300, "left": 79, "width": 700, "height": 180}
     screen = np.array(sct.grab(screen_rect))
-    #plt.imshow(screen)
-    #plt.show()
+    # plt.imshow(screen)
+    # plt.show()
     screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
     trex_top_left, trex_bottom_right = find_trex(screen, template_trex)
-    #print(trex_top_left)
+    # print(trex_top_left)
     while True:
         obstacle_area = find_lower_obstacle(screen_rect, trex_top_left, sct)[0]
-        # cv2.rectangle(screen, (screen_rect["left"], screen_rect["top"]),
-        #               (screen_rect["left"] + screen_rect["width"], screen_rect["top"] + screen_rect["height"]),
-        #               (255, 0, 0), 2)
-        #
-        # cv2.rectangle(screen, trex_top_left, trex_bottom_right, (0, 255, 0), 2)
-        #
-        # cv2.rectangle(screen, (obstacle_area["left"], obstacle_area["top"]),
-        #               (obstacle_area["left"] + obstacle_area["width"], obstacle_area["top"] + obstacle_area["height"]),
-        #               (0, 0, 255), 2)
-        #
-        # cv2.imshow("Marked Image", screen)
-        # cv2.waitKey(1)
         is_obs = find_lower_obstacle(screen_rect, trex_top_left, sct)[1]
-        # plt.imshow(obstacle_area, cmap='gray')
-        # plt.show()
+
         if is_obs:
-            ptg.keyUp('down')
             ptg.press('up')
-            time.sleep(0.4)
+            time.sleep(0.1)
         else:
-            print('down')
-            ptg.keyDown('down')
-            time.sleep(0.3)
+            pass
         if keyboard.is_pressed('q'):
             break
 
 cv2.destroyAllWindows()
-
-# opencv/numpy mss check documentation last example
-# координаты динозавра слишком маленькие потому что считаются не по всему экрану а по маленькой области screen_rect?
