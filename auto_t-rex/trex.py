@@ -6,7 +6,7 @@ from mss import mss
 import pyautogui as ptg
 import matplotlib.pyplot as plt
 
-trex_path = 'trex1.png'  # прыгает 555
+trex_path = 'trex1.png'  # прыгает 803
 
 
 def find_trex(screen, template):
@@ -25,7 +25,7 @@ def find_lower_obstacle(screen_rect, trex_top_left, sct, shift):
     else:
         obstacle_area = {"top": screen_rect["top"] + trex_top_left[1] + round(h/3)*2,  # +305 round(h/2)
                          "left": screen_rect["left"] + trex_top_left[0] + w,  # +w+72
-                         "width": 8+shift,
+                         "width": 74+shift,  # 68 - 72
                          "height": 15}
     obstacle_area1 = np.array(sct.grab(obstacle_area))
     #plt.imshow(obstacle_area1)
@@ -38,26 +38,28 @@ def find_lower_obstacle(screen_rect, trex_top_left, sct, shift):
 def count_shift():
     current_time = time.time()
     score = (current_time - start_time) * 10
-    shift = int((score // 100) * 7.5)
+    shift = int((score // 100) * 7)
     return shift
 
 
 template_trex = cv2.imread(trex_path, cv2.IMREAD_GRAYSCALE)
 w, h = template_trex.shape[::-1]
 
-start_time = time.time()
+
 with mss() as sct:
+
     screen_rect = {"top": 300, "left": 79, "width": 700, "height": 160}
     screen = np.array(sct.grab(screen_rect))
     screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
     trex_top_left, trex_bottom_right = find_trex(screen, template_trex)
-
+    start_time = time.time()
     while True:
         shift = count_shift()
+        print(shift)
         is_obs = find_lower_obstacle(screen_rect, trex_top_left, sct, shift)
         if is_obs:
             ptg.press('up')
-            time.sleep(0.2)
+            time.sleep(0.01)
         else:
             pass
         if keyboard.is_pressed('q'):
